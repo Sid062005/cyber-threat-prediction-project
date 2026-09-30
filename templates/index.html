@@ -1,0 +1,26 @@
+
+<!doctype html>
+<html>
+<head><title>Cyber Threat Prediction</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<div class="container">
+<h1>Cyber Threat Prediction System</h1>
+<p>Machine-learning based network traffic threat classification.</p>
+<div class="card">
+<h2>Model Status</h2>
+<p>{{ "Model is ready" if model_ready else "Model not trained yet" }}</p>
+{% if classes %}<p><b>Known classes:</b> {{ classes|join(", ") }}</p>{% endif %}
+</div>
+<div class="card">
+<h2>Upload Network Traffic CSV</h2>
+<form action="/predict" method="post" enctype="multipart/form-data">
+<input type="file" name="file" accept=".csv" required>
+<button type="submit">Predict Threats</button>
+</form>
+</div>
+{% with messages = get_flashed_messages() %}
+{% if messages %}<div class="alert">{{ messages[0] }}</div>{% endif %}
+{% endwith %}
+</div>
+</body>
+</html>

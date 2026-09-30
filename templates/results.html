@@ -1,0 +1,16 @@
+
+<!doctype html>
+<html>
+<head><title>Prediction Results</title><link rel="stylesheet" href="/static/style.css"></head>
+<body>
+<div class="container">
+<h1>Prediction Results</h1>
+<p>Processed rows: <b>{{ rows }}</b></p>
+<div class="card"><h2>Threat Distribution</h2>
+{% for k,v in counts.items() %}<p><b>{{ k }}</b>: {{ v }}</p>{% endfor %}
+</div>
+<div class="card"><h2>Predictions (first 100 rows)</h2>{{ table|safe }}</div>
+<a href="/">← Back</a>
+</div>
+</body>
+</html>

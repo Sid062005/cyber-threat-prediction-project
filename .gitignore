@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Large ML models
+model/*.joblib
+
+# Datasets
+UNSW_NB15_training-set.csv
+UNSW_NB15_testing-set.csv
+test_unsw.csv
+demo_data.csv
+
+# Generated / temporary files
+*.log
+.DS_Store
