@@ -1,26 +1,496 @@
 
-<!doctype html>
-<html>
-<head><title>Cyber Threat Prediction</title><link rel="stylesheet" href="/static/style.css"></head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cyber Threat Prediction System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+
 <body>
-<div class="container">
-<h1>Cyber Threat Prediction System</h1>
-<p>Machine-learning based network traffic threat classification.</p>
-<div class="card">
-<h2>Model Status</h2>
-<p>{{ "Model is ready" if model_ready else "Model not trained yet" }}</p>
-{% if classes %}<p><b>Known classes:</b> {{ classes|join(", ") }}</p>{% endif %}
+
+<div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">
+                <span>⌁</span>
+            </div>
+
+            <div>
+                <div class="brand-title">CYBER<span>GUARD</span></div>
+                <div class="brand-subtitle">THREAT INTELLIGENCE</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+
+            <div class="nav-section-title">MONITORING</div>
+
+            <a href="/" class="nav-item active">
+                <span class="nav-icon">◈</span>
+                Dashboard
+            </a>
+
+            <div class="nav-item disabled">
+                <span class="nav-icon">◉</span>
+                Threat Analysis
+                <span class="coming-soon">SOON</span>
+            </div>
+
+            <div class="nav-item disabled">
+                <span class="nav-icon">▣</span>
+                Reports
+                <span class="coming-soon">SOON</span>
+            </div>
+
+            <div class="nav-section-title">SYSTEM</div>
+
+            <div class="nav-item disabled">
+                <span class="nav-icon">⚙</span>
+                Configuration
+                <span class="coming-soon">SOON</span>
+            </div>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+
+            <div class="system-status">
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>MODEL ONLINE</strong>
+                    <small>Prediction engine ready</small>
+                </div>
+            </div>
+
+            <div class="sidebar-version">
+                ML ENGINE • RANDOM FOREST
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Bar -->
+        <header class="topbar">
+
+            <div>
+                <div class="breadcrumb">SECURITY OPERATIONS / DASHBOARD</div>
+                <h1>Cyber Threat Prediction</h1>
+            </div>
+
+            <div class="topbar-status">
+                <span class="live-dot"></span>
+                SYSTEM OPERATIONAL
+            </div>
+
+        </header>
+
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for message in messages %}
+                        <div class="flash-message">
+                            <span>⚠</span>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+
+        <!-- Overview Cards -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-card-top">
+                    <span class="stat-label">MODEL STATUS</span>
+                    <span class="stat-icon green">✓</span>
+                </div>
+
+                <div class="stat-value">
+                    {% if model_ready %}
+                        ONLINE
+                    {% else %}
+                        OFFLINE
+                    {% endif %}
+                </div>
+
+                <div class="stat-description">
+                    Prediction engine availability
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-card-top">
+                    <span class="stat-label">MODEL TYPE</span>
+                    <span class="stat-icon blue">AI</span>
+                </div>
+
+                <div class="stat-value model-name">
+                    RANDOM FOREST
+                </div>
+
+                <div class="stat-description">
+                    Machine learning classifier
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-card-top">
+                    <span class="stat-label">THREAT CLASSES</span>
+                    <span class="stat-icon purple">◈</span>
+                </div>
+
+                <div class="stat-value">
+                    {{ classes|length }}
+                </div>
+
+                <div class="stat-description">
+                    Attack categories supported
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-card-top">
+                    <span class="stat-label">INPUT FORMAT</span>
+                    <span class="stat-icon orange">CSV</span>
+                </div>
+
+                <div class="stat-value">
+                    CSV
+                </div>
+
+                <div class="stat-description">
+                    Network traffic dataset
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- Main Dashboard Grid -->
+        <section class="dashboard-grid">
+
+            <!-- Upload Panel -->
+            <div class="panel upload-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <div class="panel-kicker">TRAFFIC ANALYSIS</div>
+                        <h2>Upload Network Traffic</h2>
+                        <p>
+                            Upload a CSV dataset containing network traffic
+                            features for automated threat classification.
+                        </p>
+                    </div>
+
+                    <div class="panel-header-icon">
+                        ↑
+                    </div>
+
+                </div>
+
+
+                <form action="{{ url_for('predict') }}"
+                      method="POST"
+                      enctype="multipart/form-data"
+                      id="uploadForm">
+
+                    <label class="upload-zone" for="fileInput">
+
+                        <input type="file"
+                               name="file"
+                               id="fileInput"
+                               accept=".csv"
+                               required>
+
+                        <div class="upload-icon">
+                            ⇧
+                        </div>
+
+                        <div class="upload-title">
+                            Drop your CSV file here
+                        </div>
+
+                        <div class="upload-subtitle">
+                            or <span>browse files</span>
+                        </div>
+
+                        <div class="upload-format">
+                            ACCEPTED FORMAT: .CSV
+                        </div>
+
+                        <div id="fileName" class="selected-file">
+                        </div>
+
+                    </label>
+
+
+                    <button type="submit"
+                            class="analyze-button"
+                            id="analyzeButton">
+
+                        <span class="button-icon">◈</span>
+
+                        <span>ANALYZE NETWORK TRAFFIC</span>
+
+                        <span class="button-arrow">→</span>
+
+                    </button>
+
+                </form>
+
+            </div>
+
+
+            <!-- System Information -->
+            <div class="panel info-panel">
+
+                <div class="panel-header compact">
+
+                    <div>
+                        <div class="panel-kicker">INTELLIGENCE ENGINE</div>
+                        <h2>Detection Capabilities</h2>
+                    </div>
+
+                    <div class="shield-icon">
+                        🛡
+                    </div>
+
+                </div>
+
+
+                <div class="capability-list">
+
+                    <div class="capability-item">
+                        <div class="capability-number">01</div>
+
+                        <div>
+                            <strong>Network Analysis</strong>
+                            <p>
+                                Evaluates network traffic features
+                                from the uploaded dataset.
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div class="capability-item">
+                        <div class="capability-number">02</div>
+
+                        <div>
+                            <strong>Threat Classification</strong>
+                            <p>
+                                Identifies traffic across multiple
+                                cyber attack categories.
+                            </p>
+                        </div>
+                    </div>
+
+
+                    <div class="capability-item">
+                        <div class="capability-number">03</div>
+
+                        <div>
+                            <strong>Automated Prediction</strong>
+                            <p>
+                                Generates threat predictions using
+                                the trained Random Forest model.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Threat Classes -->
+        <section class="panel classes-panel">
+
+            <div class="panel-header classes-header">
+
+                <div>
+                    <div class="panel-kicker">CLASSIFICATION MATRIX</div>
+                    <h2>Supported Threat Categories</h2>
+                </div>
+
+                <div class="class-count">
+                    {{ classes|length }} CLASSES
+                </div>
+
+            </div>
+
+
+            <div class="class-grid">
+
+                {% for cls in classes %}
+
+                    <div class="class-chip">
+
+                        <span class="class-indicator"></span>
+
+                        <span>{{ cls }}</span>
+
+                    </div>
+
+                {% else %}
+
+                    <div class="class-chip">
+                        <span class="class-indicator"></span>
+                        Normal
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- Dataset Information -->
+        <section class="dataset-info">
+
+            <div class="dataset-item">
+                <span class="dataset-icon">▤</span>
+                <div>
+                    <strong>Dataset</strong>
+                    <span>UNSW-NB15 compatible traffic</span>
+                </div>
+            </div>
+
+            <div class="dataset-item">
+                <span class="dataset-icon">⚡</span>
+                <div>
+                    <strong>Processing</strong>
+                    <span>Automated ML classification</span>
+                </div>
+            </div>
+
+            <div class="dataset-item">
+                <span class="dataset-icon">◉</span>
+                <div>
+                    <strong>Output</strong>
+                    <span>Threat category predictions</span>
+                </div>
+            </div>
+
+        </section>
+
+
+        <footer class="footer">
+            <span>CYBERGUARD THREAT INTELLIGENCE PLATFORM</span>
+            <span>ML-POWERED NETWORK SECURITY</span>
+        </footer>
+
+    </main>
+
 </div>
-<div class="card">
-<h2>Upload Network Traffic CSV</h2>
-<form action="/predict" method="post" enctype="multipart/form-data">
-<input type="file" name="file" accept=".csv" required>
-<button type="submit">Predict Threats</button>
-</form>
-</div>
-{% with messages = get_flashed_messages() %}
-{% if messages %}<div class="alert">{{ messages[0] }}</div>{% endif %}
-{% endwith %}
-</div>
+
+
+<script>
+
+    const fileInput = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+    const uploadZone = document.querySelector(".upload-zone");
+    const uploadForm = document.getElementById("uploadForm");
+    const analyzeButton = document.getElementById("analyzeButton");
+
+    fileInput.addEventListener("change", function () {
+
+        if (this.files.length > 0) {
+
+            const file = this.files[0];
+
+            fileName.textContent = "✓ " + file.name;
+
+            uploadZone.classList.add("file-selected");
+
+        } else {
+
+            fileName.textContent = "";
+
+            uploadZone.classList.remove("file-selected");
+
+        }
+
+    });
+
+
+    uploadZone.addEventListener("dragover", function (event) {
+
+        event.preventDefault();
+
+        uploadZone.classList.add("dragover");
+
+    });
+
+
+    uploadZone.addEventListener("dragleave", function () {
+
+        uploadZone.classList.remove("dragover");
+
+    });
+
+
+    uploadZone.addEventListener("drop", function (event) {
+
+        event.preventDefault();
+
+        uploadZone.classList.remove("dragover");
+
+        const files = event.dataTransfer.files;
+
+        if (files.length > 0) {
+
+            fileInput.files = files;
+
+            fileName.textContent = "✓ " + files[0].name;
+
+            uploadZone.classList.add("file-selected");
+
+        }
+
+    });
+
+
+    uploadForm.addEventListener("submit", function () {
+
+        analyzeButton.classList.add("loading");
+
+        analyzeButton.querySelector("span:nth-child(2)").textContent =
+            "ANALYZING TRAFFIC...";
+
+    });
+
+</script>
+
 </body>
 </html>
+

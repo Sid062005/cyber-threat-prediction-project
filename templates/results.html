@@ -1,16 +1,335 @@
 
-<!doctype html>
-<html>
-<head><title>Prediction Results</title><link rel="stylesheet" href="/static/style.css"></head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Threat Analysis Results</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+          rel="stylesheet">
+
+</head>
+
+
 <body>
-<div class="container">
-<h1>Prediction Results</h1>
-<p>Processed rows: <b>{{ rows }}</b></p>
-<div class="card"><h2>Threat Distribution</h2>
-{% for k,v in counts.items() %}<p><b>{{ k }}</b>: {{ v }}</p>{% endfor %}
+
+<div class="app-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+
+            <div class="brand-icon">
+                <span>⌁</span>
+            </div>
+
+            <div>
+                <div class="brand-title">CYBER<span>GUARD</span></div>
+                <div class="brand-subtitle">THREAT INTELLIGENCE</div>
+            </div>
+
+        </div>
+
+
+        <nav class="sidebar-nav">
+
+            <div class="nav-section-title">MONITORING</div>
+
+            <a href="/" class="nav-item">
+                <span class="nav-icon">◈</span>
+                Dashboard
+            </a>
+
+            <div class="nav-item active">
+                <span class="nav-icon">◉</span>
+                Threat Analysis
+            </div>
+
+            <div class="nav-item disabled">
+                <span class="nav-icon">▣</span>
+                Reports
+                <span class="coming-soon">SOON</span>
+            </div>
+
+            <div class="nav-section-title">SYSTEM</div>
+
+            <div class="nav-item disabled">
+                <span class="nav-icon">⚙</span>
+                Configuration
+                <span class="coming-soon">SOON</span>
+            </div>
+
+        </nav>
+
+
+        <div class="sidebar-bottom">
+
+            <div class="system-status">
+
+                <span class="status-dot"></span>
+
+                <div>
+                    <strong>MODEL ONLINE</strong>
+                    <small>Prediction engine ready</small>
+                </div>
+
+            </div>
+
+            <div class="sidebar-version">
+                ML ENGINE • RANDOM FOREST
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- Main -->
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div>
+
+                <div class="breadcrumb">
+                    SECURITY OPERATIONS / THREAT ANALYSIS
+                </div>
+
+                <h1>Prediction Results</h1>
+
+            </div>
+
+
+            <div class="topbar-status">
+                <span class="live-dot"></span>
+                ANALYSIS COMPLETE
+            </div>
+
+        </header>
+
+
+        <!-- Summary -->
+        <section class="results-summary">
+
+            <div class="result-card total">
+
+                <div class="result-icon">▤</div>
+
+                <div>
+                    <div class="result-label">PROCESSED ROWS</div>
+
+                    <div class="result-value">
+                        {{ rows }}
+                    </div>
+
+                    <div class="result-subtext">
+                        Network traffic records
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="result-card threat">
+
+                <div class="result-icon">⚠</div>
+
+                <div>
+                    <div class="result-label">THREAT TYPES</div>
+
+                    <div class="result-value">
+                        {{ counts|length }}
+                    </div>
+
+                    <div class="result-subtext">
+                        Categories detected
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="result-card detected">
+
+                <div class="result-icon">◉</div>
+
+                <div>
+                    <div class="result-label">THREAT RECORDS</div>
+
+                    <div class="result-value">
+                        {% set threat_count = rows - counts.get('Normal', 0) %}
+                        {{ threat_count }}
+                    </div>
+
+                    <div class="result-subtext">
+                        Classified as non-normal
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="result-card normal">
+
+                <div class="result-icon">✓</div>
+
+                <div>
+                    <div class="result-label">NORMAL RECORDS</div>
+
+                    <div class="result-value">
+                        {{ counts.get('Normal', 0) }}
+                    </div>
+
+                    <div class="result-subtext">
+                        Normal traffic
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Distribution -->
+        <section class="panel distribution-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <div class="panel-kicker">
+                        CLASSIFICATION ANALYSIS
+                    </div>
+
+                    <h2>Threat Distribution</h2>
+
+                    <p>
+                        Distribution of predicted network traffic categories.
+                    </p>
+                </div>
+
+                <div class="analysis-badge">
+                    ML PREDICTION
+                </div>
+
+            </div>
+
+
+            <div class="threat-distribution">
+
+                {% for threat, count in counts.items() %}
+
+                    {% set percentage = (count / rows * 100) if rows else 0 %}
+
+                    <div class="threat-row">
+
+                        <div class="threat-name">
+
+                            <span class="threat-dot
+                                {% if threat == 'Normal' %}
+                                    normal-dot
+                                {% else %}
+                                    alert-dot
+                                {% endif %}">
+                            </span>
+
+                            <strong>{{ threat }}</strong>
+
+                        </div>
+
+
+                        <div class="threat-bar-container">
+
+                            <div class="threat-bar
+                                {% if threat == 'Normal' %}
+                                    normal-bar
+                                {% endif %}"
+                                style="width: {{ percentage }}%;">
+                            </div>
+
+                        </div>
+
+
+                        <div class="threat-count">
+                            {{ count }}
+                        </div>
+
+
+                        <div class="threat-percentage">
+                            {{ "%.1f"|format(percentage) }}%
+                        </div>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+
+        <!-- Table -->
+        <section class="panel table-panel">
+
+            <div class="panel-header table-header">
+
+                <div>
+
+                    <div class="panel-kicker">
+                        TRAFFIC RECORDS
+                    </div>
+
+                    <h2>Prediction Details</h2>
+
+                    <p>
+                        Showing the first 100 records from the analyzed dataset.
+                    </p>
+
+                </div>
+
+
+                <a href="/" class="secondary-button">
+                    ← NEW ANALYSIS
+                </a>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                {{ table|safe }}
+
+            </div>
+
+        </section>
+
+
+        <footer class="footer">
+
+            <span>
+                CYBERGUARD THREAT INTELLIGENCE PLATFORM
+            </span>
+
+            <span>
+                ANALYSIS COMPLETE • {{ rows }} RECORDS
+            </span>
+
+        </footer>
+
+    </main>
+
 </div>
-<div class="card"><h2>Predictions (first 100 rows)</h2>{{ table|safe }}</div>
-<a href="/">← Back</a>
-</div>
+
 </body>
 </html>
+
+
